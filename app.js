@@ -1,5 +1,5 @@
 let express = require('express');
-let fs = require('fs')
+let db = require('./db');
 
 
 let app = express();
@@ -8,22 +8,24 @@ app.use(express.json());
 
 
 app.get('/api/students', (req, res)=>{
-fs.readFile('./db.json', 'utf-8', (err, data)=>{
-    let students = JSON.parse(data);
-    
-    res.send(students);
-})
+    db.getDbStudents()
+    .then(students=>{
+        res.send(students)
+    })
+
 })
 
 app.post('/api/students', (req, res)=>{
-   let student = req.body;
-   fs.readFile('./db.json','utf-8', (err, data)=>{
-    let students = JSON.parse(data);
-    students.push(student);
-    fs.writeFile('./db.json', JSON.stringify(students),(err)=>{
-        res.send(student);
+    let student = req.body;
+    db.getDbStudents()
+    .then(students=>{
+        students.push(student);
+        db.insertDbStudents(students)
+        .then(data=>{
+            res.send(data)
+        })
     })
-   })
+  
 
 })
 
